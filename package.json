@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "start": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "@slack/events-api": "^2.2.0",
+    "@slack/web-api": "^5.0.0",
+    "axios": "^0.18.0",
+    "dotenv": "^8.0.0",
+  },
+  "devDependencies": {
+    "ts-node": "^8.1.0",
+    "typescript": "^3.4.3"
+  }
+}
