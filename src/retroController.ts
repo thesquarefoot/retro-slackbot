@@ -20,7 +20,7 @@ async function retroBotMentioned(event: SlackEvent) {
 
   await slackApi.sendDirectMessage(
     RETRO_CHANNEL_ID,
-    'I dont understand. I only understand the *stop* and *finish* commands.'
+    'I dont understand. I only understand the *start* and *finish* commands.'
   );
 }
 
