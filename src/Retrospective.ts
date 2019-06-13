@@ -1,24 +1,31 @@
-import { FeedbackType } from './types';
+import { SlackApi, Feedback } from "./types";
 
 class Retrospective {
   public inProgress: boolean;
-  private feedback: Record<FeedbackType, string[]>;
+  private feedback: Feedback;
   private retroStartUser: String;
-  private slackApi: any;
+  private slackApi: SlackApi;
 
-  constructor(slackApi: object) {
+  constructor(slackApi: SlackApi) {
     this.inProgress = false;
-    this.feedback = {
-      positive: [],
-      negative: [],
-      question: []
-    }
+    this.feedback = {};
     this.slackApi = slackApi;
   }
 
-  start(retroStartUser: string) {
-    this.inProgress = true;
+  async start(retroStartUser: string) {
+    const members = await this.slackApi.getChannelMembers(process.env.RETRO_CHANNEL_ID);
+    members.forEach(member => {
+      this.slackApi.sendDirectMessage(
+        member,
+        `Hi there - I'm the SquareFoot RetroBot. Please send your retro feedback to me. Prefix each of your feedback items with one of the following:
+        + Positive - Something that went well this sprint
+        - Negative - Something you think could have gone better this sprint.
+        ? Questions - Questions or items you would like to discuss with the wider team.`
+      );
+    });
+    this.feedback = {};
     this.retroStartUser = retroStartUser;
+    this.inProgress = true;
   }
 
   status() {
@@ -26,16 +33,19 @@ class Retrospective {
   }
 
   async finish() {
+    const feedbackMessage = Object.keys(this.feedback).reduce(
+      (acc, next) => acc + this.feedback[next].join('\n') + '\n',
+      '' 
+    );
+    await this.slackApi.sendDirectMessage(this.retroStartUser, feedbackMessage);
     this.inProgress = false;
-    const feedbackMessage = Object.keys(this.feedback).reduce((acc, next) => acc + this.feedback[next].join(''), '');
-    this.slackApi.sendDirectMessage(this.retroStartUser, feedbackMessage);
   }
 
-  storeFeedback(feedback: any) {
+  storeFeedback(feedback: Feedback) {
     this.feedback = {
-      positive: [...this.feedback.positive, ...feedback.positive],
-      negative: [...this.feedback.negative, ...feedback.negative],
-      question: [...this.feedback.question, ...feedback.question],
+      positive: [...this.feedback.positive || [], ...feedback.positive],
+      negative: [...this.feedback.negative || [], ...feedback.negative],
+      question: [...this.feedback.question || [], ...feedback.question]
     };
   }
 }
