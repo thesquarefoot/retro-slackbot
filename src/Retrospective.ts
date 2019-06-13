@@ -1,4 +1,5 @@
 import { SlackApi, Feedback } from "./types";
+import { RETRO_CHANNEL_ID } from "./constants";
 
 class Retrospective {
   public inProgress: boolean;
@@ -13,7 +14,7 @@ class Retrospective {
   }
 
   async start(retroStartUser: string) {
-    const members = await this.slackApi.getChannelMembers(process.env.RETRO_CHANNEL_ID);
+    const members = await this.slackApi.getChannelMembers(RETRO_CHANNEL_ID);
     members.forEach(member => {
       this.slackApi.sendDirectMessage(
         member,
